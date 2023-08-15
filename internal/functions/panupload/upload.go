@@ -238,6 +238,19 @@ func (pu *PanUpload) CommitFile() (cerr error) {
 		FileId:   pu.uploadOpEntity.FileId,
 		UploadId: pu.uploadOpEntity.UploadId,
 	})
+	if er != nil && er.Code == apierror.ApiCodeDeviceSessionSignatureInvalid {
+		_, e := pu.panClient.CreateSession(nil)
+		if e == nil {
+			// retry
+			_, er = pu.panClient.CompleteUploadFile(&aliyunpan.CompleteUploadFileParam{
+				DriveId:  pu.driveId,
+				FileId:   pu.uploadOpEntity.FileId,
+				UploadId: pu.uploadOpEntity.UploadId,
+			})
+		} else {
+			logger.Verboseln("CreateSession failed")
+		}
+	}
 	if er != nil {
 		return er
 	}

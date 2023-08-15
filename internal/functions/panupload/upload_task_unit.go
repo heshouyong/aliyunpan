@@ -369,9 +369,16 @@ StepUploadPrepareUpload:
 		}
 		if needToCreateFolder {
 			logger.Verbosef("[%s] %s 创建云盘文件夹: %s\n", utu.taskInfo.Id(), time.Now().Format("2006-01-02 15:04:06"), saveFilePath)
-			// rs, apierr = utu.PanClient.MkdirRecursive(utu.DriveId, "", "", 0, strings.Split(path.Clean(saveFilePath), "/"))
-			// 可以直接创建的，不用循环创建
 			rs, apierr = utu.PanClient.Mkdir(utu.DriveId, "root", saveFilePath)
+			if apierr != nil && apierr.Code == apierror.ApiCodeDeviceSessionSignatureInvalid {
+				_, e := utu.PanClient.CreateSession(nil)
+				if e == nil {
+					// retry
+					rs, apierr = utu.PanClient.Mkdir(utu.DriveId, "root", saveFilePath)
+				} else {
+					logger.Verboseln("CreateSession failed")
+				}
+			}
 			if apierr != nil || rs.FileId == "" {
 				result.Err = apierr
 				result.ResultMessage = "创建云盘文件夹失败"
@@ -463,6 +470,15 @@ StepUploadPrepareUpload:
 	}
 
 	uploadOpEntity, apierr = utu.PanClient.CreateUploadFile(appCreateUploadFileParam)
+	if apierr != nil && apierr.Code == apierror.ApiCodeDeviceSessionSignatureInvalid {
+		_, e := utu.PanClient.CreateSession(nil)
+		if e == nil {
+			// retry
+			uploadOpEntity, apierr = utu.PanClient.CreateUploadFile(appCreateUploadFileParam)
+		} else {
+			logger.Verboseln("CreateSession failed")
+		}
+	}
 	if apierr != nil {
 		result.Err = apierr
 		result.ResultMessage = "创建上传任务失败：" + apierr.Error()

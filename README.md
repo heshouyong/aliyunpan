@@ -14,28 +14,35 @@
 10. 支持[JavaScript插件](docs/manual.md#JavaScript插件)，你可以按照自己的需要定制上传/下载中关键步骤的行为，最大程度满足自己的个性化需求
 
 # 目录
+- [关于](#关于)
+- [特色](#特色)
+- [目录](#目录)
 - [如何安装](#如何安装)
-    * [直接下载安装](#直接下载安装)
-    * [apt安装](#apt安装)
-    * [yum安装](#yum安装)
-    * [docker安装](#docker安装)
-        + [sync同步盘](#sync同步盘)
-        + [webdav共享盘](#webdav共享盘)
+  - [直接下载安装](#直接下载安装)
+  - [apt安装](#apt安装)
+  - [yum安装](#yum安装)
+  - [brew安装](#brew安装)
+  - [winget安装](#winget安装)
+  - [docker安装](#docker安装)
+    - [sync同步盘](#sync同步盘)
+    - [webdav共享盘](#webdav共享盘)
 - [如何使用](#如何使用)
-    * [基本使用](#基本使用)
-        + [修改配置目录](#修改配置目录)
-        + [启动程序](#启动程序)
-        + [查看帮助](#查看帮助)
-        + [登录](#登录)
-        + [查看文件列表](#查看文件列表)
-        + [下载文件](#下载文件)
-        + [上传文件](#上传文件)
-        + [同步备份文件](#同步备份文件)
-    * [更多命令](#更多命令)
+  - [基本使用](#基本使用)
+    - [修改配置目录](#修改配置目录)
+    - [启动程序](#启动程序)
+    - [查看帮助](#查看帮助)
+    - [登录](#登录)
+    - [查看文件列表](#查看文件列表)
+    - [下载文件](#下载文件)
+    - [上传文件](#上传文件)
+    - [同步备份文件](#同步备份文件)
+  - [更多命令](#更多命令)
 - [常见问题](#常见问题)
-    * [如何获取RefreshToken](#如何获取RefreshToken)
-    * [如何开启Debug调试日志](#如何开启Debug调试日志)
-    * [如何登出和下线客户端](#如何登出和下线客户端)
+  - [如何获取RefreshToken](#如何获取refreshtoken)
+  - [如何开启Debug调试日志](#如何开启debug调试日志)
+    - [第一步](#第一步)
+    - [第二步](#第二步)
+  - [如何登出和下线客户端](#如何登出和下线客户端)
 - [交流反馈](#交流反馈)
 - [鸣谢](#鸣谢)
 
@@ -54,9 +61,9 @@
 
 参考例子：
 ```shell
-wget https://github.com/tickstep/aliyunpan/releases/download/v0.2.6/aliyunpan-v0.2.6-linux-amd64.zip
-unzip aliyunpan-v0.2.6-linux-amd64.zip
-cd aliyunpan-v0.2.6-linux-amd64
+wget https://github.com/tickstep/aliyunpan/releases/download/v0.2.7/aliyunpan-v0.2.7-linux-amd64.zip
+unzip aliyunpan-v0.2.7-linux-amd64.zip
+cd aliyunpan-v0.2.7-linux-amd64
 ./aliyunpan
 ```
 
@@ -74,6 +81,31 @@ sudo curl -fsSL http://file.tickstep.com/rpm/aliyunpan/aliyunpan.repo | sudo tee
  
 ```
 
+## brew安装
+适用于brew包管理器的系统，主要是苹果macOS系统。目前只支持amd64和arm64架构(Apple Silicon)的机器。
+```shell
+brew install aliyunpan
+    
+```
+由于brew默认安装在系统目录下面，这样配置文件也默认存放在系统目录里了，建议设置系统变量进行配置文件的单独存储，例如
+```shell
+export ALIYUNPAN_CONFIG_DIR=/Users/tickstep/Applications/adrive/config
+```
+
+## winget安装
+适用于Windows系统的winget包管理器。目前只支持x86和x64架构的机器。  
+    
+更新源（可选）
+```powershell
+winget source update
+ 
+```
+安装
+```powershell
+winget install tickstep.aliyunpan --silent
+ 
+```
+
 ## docker安装
 ### sync同步盘
 同步备份功能，支持备份本地文件到云盘，备份云盘文件到本地，双向同步备份三种模式。支持JavaScript插件对备份文件进行过滤。
@@ -82,7 +114,7 @@ sudo curl -fsSL http://file.tickstep.com/rpm/aliyunpan/aliyunpan.repo | sudo tee
 2. 备份云盘文件，即下载网盘文件到本地，始终保持网盘的文件有一个完整的备份在本地
 3. 双向备份，保持网盘文件和本地文件严格一致
 ```
-docker run -d --name=aliyunpan-sync --restart=always -v "<your local dir>:/home/app/data" -e TZ="Asia/Shanghai" -e ALIYUNPAN_REFRESH_TOKEN="<your refreshToken>" -e ALIYUNPAN_PAN_DIR="<your drive pan dir>" -e ALIYUNPAN_SYNC_MODE="upload" -e ALIYUNPAN_TASK_STEP="sync" tickstep/aliyunpan-sync:v0.2.6
+docker run -d --name=aliyunpan-sync --restart=always -v "<your local dir>:/home/app/data" -e TZ="Asia/Shanghai" -e ALIYUNPAN_REFRESH_TOKEN="<your refreshToken>" -e ALIYUNPAN_PAN_DIR="<your drive pan dir>" -e ALIYUNPAN_SYNC_MODE="upload" -e ALIYUNPAN_TASK_STEP="sync" tickstep/aliyunpan-sync:v0.2.7
  
   
 <your local dir>：本地目录绝对路径，例如：/tickstep/Documents/设计文档
@@ -96,7 +128,7 @@ ALIYUNPAN_TASK_STEP：任务步骤, 支持两种: scan(只扫描并建立同步�
 ### webdav共享盘
 让阿里云盘变身为webdav协议的文件服务器。这样使用webdav客户端软件，你可以把阿里云盘挂载为Windows、Linux、Mac系统的磁盘，可以通过NAS系统做文件管理或文件同步等等。
 ```
-docker run -d --name=aliyunpan-webdav --restart=always -p 23077:23077 -e TZ="Asia/Shanghai" -e ALIYUNPAN_REFRESH_TOKEN="<your refreshToken>" -e ALIYUNPAN_AUTH_USER="admin" -e ALIYUNPAN_AUTH_PASSWORD="admin" -e ALIYUNPAN_WEBDAV_MODE="rw" -e ALIYUNPAN_PAN_DRIVE="File" -e ALIYUNPAN_PAN_DIR="/" tickstep/aliyunpan-webdav:v0.2.6
+docker run -d --name=aliyunpan-webdav --restart=always -p 23077:23077 -e TZ="Asia/Shanghai" -e ALIYUNPAN_REFRESH_TOKEN="<your refreshToken>" -e ALIYUNPAN_AUTH_USER="admin" -e ALIYUNPAN_AUTH_PASSWORD="admin" -e ALIYUNPAN_WEBDAV_MODE="rw" -e ALIYUNPAN_PAN_DRIVE="File" -e ALIYUNPAN_PAN_DIR="/" tickstep/aliyunpan-webdav:v0.2.7
  
  
 ALIYUNPAN_REFRESH_TOKEN RefreshToken

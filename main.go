@@ -20,6 +20,7 @@ import (
 	"github.com/tickstep/aliyunpan/cmder/cmdtable"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -50,7 +51,7 @@ const (
 
 var (
 	// Version 版本号
-	Version = "v0.2.6"
+	Version = "v0.2.7"
 
 	// 命令历史文件
 	historyFilePath = filepath.Join(config.GetConfigDir(), "aliyunpan_command_history.txt")
@@ -68,7 +69,7 @@ func init() {
 	case nil:
 	case config.ErrConfigFileNoPermission, config.ErrConfigContentsParseError:
 		fmt.Fprintf(os.Stderr, "FATAL ERROR: config file error: %s\n", err)
-		os.Exit(1)
+		//os.Exit(1)
 	default:
 		fmt.Printf("WARNING: config init error: %s\n", err)
 	}
@@ -598,6 +599,29 @@ func main() {
 			},
 			Hidden:   true,
 			HideHelp: true,
+		},
+
+		// 执行系统命令
+		{
+			Name:     "run",
+			Usage:    "执行系统命令",
+			Category: "其他",
+			Action: func(c *cli.Context) error {
+				if c.NArg() == 0 {
+					cli.ShowCommandHelp(c, c.Command.Name)
+					return nil
+				}
+
+				cmd := exec.Command(c.Args().First(), c.Args().Tail()...)
+				cmd.Stdout = os.Stdout
+				cmd.Stdin = os.Stdin
+				cmd.Stderr = os.Stderr
+				err := cmd.Run()
+				if err != nil {
+					fmt.Println(err)
+				}
+				return nil
+			},
 		},
 
 		// 调试用 debug
